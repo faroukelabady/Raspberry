@@ -6,6 +6,7 @@ package com.solutions.main;
 
 import com.solutions.protocols.ConnectionProtocol;
 import com.solutions.protocols.TCPConnection;
+import com.solutions.utility.DataUtility;
 import com.solutions.utility.Utilities;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -50,6 +51,7 @@ public class Main {
         ConnectionProtocol conn = null;
 
         Scanner input = new Scanner(System.in);
+        DataUtility.intializeProperties();
         System.out.println("please provide the following information.");
         System.out.println("Communication Protocol(TCP|UDP):");
         protocol = input.nextLine();

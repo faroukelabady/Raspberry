@@ -28,11 +28,11 @@ public class TCPConnection implements ConnectionProtocol {
         //try {
 
         // Get a Socket for TCPConnection
-        TCPSocket = new Socket(hostname, port);
+//        TCPSocket = new Socket(hostname, port);
         TCPServerSocket = new ServerSocket(port);
         // create printwriter object and assign the socket output
         // stream to it using outputstreamwriter class
-        pw = new PrintWriter(new OutputStreamWriter(TCPSocket.getOutputStream()));
+//        pw = new PrintWriter(new OutputStreamWriter(TCPSocket.getOutputStream()));
         System.out.println("Connection Open");
         //}
     }

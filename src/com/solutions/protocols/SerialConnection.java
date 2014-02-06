@@ -16,11 +16,11 @@ import java.io.IOException;
  */
 public class SerialConnection implements ConnectionProtocol {
 
-    final Serial serial;
+    final Serial serial = null;
 
     public SerialConnection(String comPort, int baudrate) {
-        serial = SerialFactory.createInstance();
-        serial.open(comPort, baudrate);
+//        serial = SerialFactory.createInstance();
+//        serial.open(comPort, baudrate);
     }
 
     @Override
@@ -37,16 +37,21 @@ public class SerialConnection implements ConnectionProtocol {
                 DataUtility.getPropertyValue(data);
 //            Utilities.hexStringToByteArray(DataUtility.getPropertyValue(data).substring(2));
                 // write a formatted string to the serial transmit buffer
+                System.out.println("Before Send" + Utilities.hexStringToByteArray(DataUtility.getPropertyValue(data).substring(2)));
                 serial.write(Utilities.hexStringToByteArray(DataUtility.getPropertyValue(data).substring(2)));
             } else {
                 
                 String[] seekData = data.split("-");
                 
-                String devNum = seekData[0].substring(3);
+                String devNum = seekData[0].substring(4);
                 
-                System.out.println(devNum);
+                byte dev = Byte.valueOf(devNum);
                 
-                System.out.println(seekData[1]);
+                byte byteData = (byte) ((0x80 | (dev << 5)) | (Byte.valueOf(seekData[1]))); 
+                
+                System.out.println(Integer.toBinaryString(byteData));
+                
+                serial.write(byteData);
             }
 
         } catch (IllegalStateException ex) {

@@ -28,8 +28,8 @@ public class DataUtility {
             FileInputStream file;
             CodeSource codeSource = DataUtility.class.getProtectionDomain().getCodeSource();
             File jarDir = new File(codeSource.getLocation().toURI().getPath());
-            String path = jarDir + "/Config.properties";
-
+            String path = jarDir.getParent() + "/Config.properties";
+            System.out.println(path);
             file = new FileInputStream(path);
             properties.load(file);
             
