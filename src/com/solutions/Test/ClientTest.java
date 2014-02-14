@@ -53,7 +53,7 @@ public class ClientTest {
         
 //        if("tcp".equalsIgnoreCase(protocol)){
             System.out.println("connecting through TCP IP protocols");
-            conn = new TCPConnection("192.168.1.105", 5000);
+            conn = new TCPConnection("192.168.1.115", 5000);
             System.out.println("Insert Data:");
             
 //            data = input.nextLine();

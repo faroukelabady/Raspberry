@@ -4,10 +4,9 @@
  */
 package com.solutions.protocols;
 
-import com.pi4j.io.serial.Serial;
-import com.solutions.utility.DataUtility;
 import java.io.*;
 import java.net.*;
+import com.pi4j.io.serial.Serial;
 
 /**
  *
@@ -22,6 +21,7 @@ public class TCPConnection implements ConnectionProtocol {
     private ServerSocket TCPServerSocket; // server connection
     private PrintWriter pw;
     String line1 = "";
+    ConnectionProtocol serial;
     // end of parameters
 
     public TCPConnection(String hostname, int port) throws IOException {
@@ -30,6 +30,7 @@ public class TCPConnection implements ConnectionProtocol {
         // Get a Socket for TCPConnection
 //        TCPSocket = new Socket(hostname, port);
         TCPServerSocket = new ServerSocket(port);
+         serial =   new SerialConnection(Serial.DEFAULT_COM_PORT, 19200, TCPServerSocket);
         // create printwriter object and assign the socket output
         // stream to it using outputstreamwriter class
 //        pw = new PrintWriter(new OutputStreamWriter(TCPSocket.getOutputStream()));
@@ -91,12 +92,12 @@ public class TCPConnection implements ConnectionProtocol {
                     } else {
                         System.out.println("Send to serial port");
                         System.out.println(line);
-
+                        ((SerialConnection)serial).setSocket(client);
                         line1 = line;
 //                        char[] data = line1.toCharArray();
-                        ConnectionProtocol serial = new SerialConnection(Serial.DEFAULT_COM_PORT, 9600);
                         serial.sendData(line1);
-                        serial.closeConnection();
+                        
+//                        serial.closeConnection();
                     }
                 }
                 reader.close();

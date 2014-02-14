@@ -4,22 +4,18 @@
  */
 package com.solutions.main;
 
+import com.pi4j.io.serial.Serial;
 import com.solutions.protocols.ConnectionProtocol;
+import com.solutions.protocols.SerialConnection;
 import com.solutions.protocols.TCPConnection;
 import com.solutions.utility.DataUtility;
-import com.solutions.utility.Utilities;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceInfo;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 /**
  *
@@ -28,6 +24,7 @@ import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 public class Main {
 
     public final static String REMOTE_TYPE = "_7elol-remote._tcp.local.";
+
     /**
      * @param args the command line arguments
      */
@@ -50,18 +47,27 @@ public class Main {
         String protocol = null;
         ConnectionProtocol conn = null;
 
-        Scanner input = new Scanner(System.in);
         DataUtility.intializeProperties();
-        System.out.println("please provide the following information.");
-        System.out.println("Communication Protocol(TCP|UDP):");
-        protocol = input.nextLine();
-        System.out.println("IP Address:");
-        ip = input.nextLine();
-        System.out.println("Port:");
-        port = input.nextInt();
 
-        // jmdns service creation and registeration
-        System.out.println("Opening JmDNS...");
+        if (args.length == 3) {
+
+            System.out.println("Setting Protocol:" + args[0]);
+            protocol = args[0];
+            System.out.println("Setting IP Address:" + args[1]);
+            ip = args[1];
+            System.out.println("Setting Port:" + args[2]);
+            port = Integer.valueOf(args[2]);
+        } else {
+
+            Scanner input = new Scanner(System.in);
+            System.out.println("please provide the following information.");
+            System.out.println("Communication Protocol(TCP|UDP):");
+            protocol = input.nextLine();
+            System.out.println("IP Address:");
+            ip = input.nextLine();
+            System.out.println("Port:");
+            port = input.nextInt();
+        }
 
         if ("tcp".equalsIgnoreCase(protocol)) {
             System.out.println("connecting through TCP IP protocols");
@@ -71,7 +77,6 @@ public class Main {
         } else {
             System.out.println("not supported protocols");
         }
-        
 
 //        System.out.println("your Ip:" + ip + ":Port" + port);
     }
