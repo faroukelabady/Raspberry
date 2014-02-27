@@ -13,9 +13,9 @@ import com.solutions.utility.Utilities;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,14 +43,29 @@ public class SerialConnection implements ConnectionProtocol {
             @Override
             public void dataReceived(SerialDataEvent event) {
                 // print out the data received to the console
-                System.out.println("recieved from uC data: ");
+
                 if (socket != null) {
                     try {
-                        System.out.println("remote IP" + socket.getRemoteSocketAddress().toString().split(":")[0]);
-                        Socket client = new Socket(socket.getRemoteSocketAddress().toString().split(":")[0], 5001);
-                        
+                        System.out.println("remote IP : " + socket.getInetAddress().getHostAddress());
+                        System.out.println("data raw : " + event.getData());
+                        byte[] bytes = event.getData().getBytes();
+                        String data = "";
+                        for (byte b : bytes) {
+                            // Add 0x100 then skip char(0) to left-pad bits with zeros
+                            System.out.println("recived DATA from micro : " + Integer.toBinaryString(0x100 + b).substring(1));
+                            TCPConnection.syncData = Utilities.booleanArrayFromByte(b);
+                            if (TCPConnection.syncData != null && TCPConnection.syncData.length > 0) {
+                                for (int i = 0; i < TCPConnection.syncData.length; i++) {
+                                    data += (i + 1) + "=" + TCPConnection.syncData[i] + "&";
+                                }
+                            }
+                        }
+                        InetAddress serverAddr = InetAddress.getByName(socket.getInetAddress().getHostAddress());
+                        Socket client = new Socket(serverAddr, 7650);
+//                        client.connect(socket.getRemoteSocketAddress());
                         PrintWriter pw = new PrintWriter(new OutputStreamWriter(client.getOutputStream()));
-                        pw.printf(event.getData());
+
+                        pw.print(data);
                         pw.flush();
                         pw.close();
                         client.close();

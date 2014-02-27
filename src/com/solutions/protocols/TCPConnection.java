@@ -7,6 +7,8 @@ package com.solutions.protocols;
 import java.io.*;
 import java.net.*;
 import com.pi4j.io.serial.Serial;
+import com.solutions.utility.DataUtility;
+import com.solutions.utility.Utilities;
 
 /**
  *
@@ -22,6 +24,7 @@ public class TCPConnection implements ConnectionProtocol {
     private PrintWriter pw;
     String line1 = "";
     ConnectionProtocol serial;
+    static boolean[] syncData = null;
     // end of parameters
 
     public TCPConnection(String hostname, int port) throws IOException {
@@ -29,8 +32,9 @@ public class TCPConnection implements ConnectionProtocol {
 
         // Get a Socket for TCPConnection
 //        TCPSocket = new Socket(hostname, port);
+        DataUtility.intializeProperties();
         TCPServerSocket = new ServerSocket(port);
-         serial =   new SerialConnection(Serial.DEFAULT_COM_PORT, 19200, TCPServerSocket);
+        serial = new SerialConnection(Serial.DEFAULT_COM_PORT, Integer.valueOf(DataUtility.getPropertyValue("baudrate")), TCPServerSocket);
         // create printwriter object and assign the socket output
         // stream to it using outputstreamwriter class
 //        pw = new PrintWriter(new OutputStreamWriter(TCPSocket.getOutputStream()));
@@ -73,13 +77,13 @@ public class TCPConnection implements ConnectionProtocol {
         String line = "";
         for (;;) {
             System.out.println("begin data receiving waiting for input.......");
-            
+
             try {
                 // get the next tcp client
                 Socket client = TCPServerSocket.accept();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-                while (true) {
+                while (!Thread.currentThread().isInterrupted()) {
                     System.out.println("Data Received");
                     if (client.isClosed()) {
                         continue;
@@ -89,20 +93,40 @@ public class TCPConnection implements ConnectionProtocol {
                     // Check for end of data
                     if (line == null) {
                         break;
+                    } else if (line.equalsIgnoreCase("sync")) {
+
+                        InetAddress serverAddr = InetAddress.getByName(client.getInetAddress().getHostAddress());
+                        Socket socket = new Socket(serverAddr, 7650);
+//                        client.connect(socket.getRemoteSocketAddress());
+                        PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+//                        byte b = (byte) 0b00000000;
+//                        boolean[] syncData = Utilities.booleanArrayFromByte(b);
+
+                        String data = "";
+                        if (syncData != null && syncData.length > 0) {
+                            for (int i = 0; i < TCPConnection.syncData.length; i++) {
+                                data += (i + 1) + "=" + TCPConnection.syncData[i] + "&";
+                            }
+                        }
+
+                        pw.println(data);
+                        pw.flush();
+                        pw.close();
                     } else {
                         System.out.println("Send to serial port");
                         System.out.println(line);
-                        ((SerialConnection)serial).setSocket(client);
+                        ((SerialConnection) serial).setSocket(client);
                         line1 = line;
 //                        char[] data = line1.toCharArray();
                         serial.sendData(line1);
-                        
+
 //                        serial.closeConnection();
                     }
                 }
                 reader.close();
-                client.close();
-                client = null;
+
+//                client.close();
+//                client = null;
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             } catch (Exception e) {
@@ -114,11 +138,10 @@ public class TCPConnection implements ConnectionProtocol {
 
     @Override
     public int getLocalPort() {
-        if(TCPServerSocket != null){
+        if (TCPServerSocket != null) {
             return TCPServerSocket.getLocalPort();
         }
         return 0;
     }
-    
-    
+
 }
